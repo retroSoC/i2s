@@ -8,13 +8,5 @@
 // MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 // See the Mulan PSL v2 for more details.
 
-`include "i2s_define.sv"
-
-module i2s_clkgen (
-    input logic        clk_i,
-    input logic        rst_n_i,
-    input logic        en_i,
-    input logic [15:0] div_i // NOTE: replace constant def
-);
-
+module i2c_core ();
 endmodule
