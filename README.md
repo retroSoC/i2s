@@ -17,12 +17,14 @@
 ## Features
 * Compatible with Phillps I2S standard
 * Half duplex serial data transmission(send or receive only)
+* Audio CODEC master or slave mode support
+* Programmable IDLE clock polarity
 * Programmable prescaler
     * max division factor is up to 2^16
     * 8KHz, 16KHz, 32KHz, 48KHz or 96KHz sample rate
 * Stereo or left channel and right channel only mode
 * MSB-justified, LSB-justified or I2S Phillps mode
-* 16, 18, 20 or 24 bits data transmission size
+* 8~32 bits(16, 18, 20, 24 or 32 bits) data transmission size
 * Independent send and receive FIFO
     * 16~64 data depth
     * empty or no-emtpy status flag
