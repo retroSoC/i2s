@@ -52,10 +52,13 @@
 `define I2S_RXR_ADDR  {26'b00, `I2S_RXR , 2'b00}
 `define I2S_STAT_ADDR {26'b00, `I2S_STAT, 2'b00}
 
+`define I2S_DATA_WIDTH 32
+`define I2S_DATA_BIT_WIDTH $clog2(`I2S_DATA_WIDTH)
+
 `define I2S_CTRL_WIDTH 26
 `define I2S_DIV_WIDTH 16
-`define I2S_TXR_WIDTH  32
-`define I2S_RXR_WIDTH  32
+`define I2S_TXR_WIDTH  `I2S_DATA_WIDTH
+`define I2S_RXR_WIDTH  `I2S_DATA_WIDTH
 `define I2S_STAT_WIDTH 5
 
 `define I2S_WM_SEND 2'b00

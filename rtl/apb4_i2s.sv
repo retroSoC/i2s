@@ -34,7 +34,7 @@ module apb4_i2s #(
   logic [4:0] s_bit_txth, s_bit_rxth;
   logic s_bit_txif, s_bit_rxif, s_busy;
   // i2s
-  logic s_i2s_clk;
+  logic s_i2s_mst_sck, s_i2s_sck, s_i2s_mst_ws, s_i2s_ws;
   // irq
   logic s_busy, s_tx_irq_trg, s_rx_irq_trg;
   // fifo
@@ -65,7 +65,16 @@ module apb4_i2s #(
   assign s_bit_rxth      = s_i2s_ctrl_q[25:21];
   assign s_bit_txif      = s_i2s_stat_q[0];
   assign s_bit_rxif      = s_i2s_stat_q[1];
-  assign s_busy          = 1'b0;  // TODO:
+
+  // i2s if
+  assign i2s.mclk_o      = s_bit_msr ? i2s.aud_clk_i : 1'b0;
+  assign i2s.sck_o       = s_bit_msr ? s_i2s_mst_sck : 1'b0;
+  assign i2s.sck_en_o    = ~s_bit_msr;
+  assign i2s.ws_o        = s_bit_msr ? s_i2s_mst_ws : 1'b0;
+  assign i2s.ws_en_o     = ~s_bit_msr;
+  assign s_i2s_sck       = s_bit_msr ? s_i2s_mst_sck : i2s.sck_i;
+  assign s_i2s_ws        = s_bit_msr ? s_i2s_mst_ws : i2s.ws_i;
+  assign i2s.irq_o       = 1'b0;  // TODO:
 
   assign s_i2s_ctrl_en   = s_apb4_wr_hdshk && s_apb4_addr == `I2S_CTRL && ~s_busy;
   assign s_i2s_ctrl_d    = s_i2s_ctrl_en ? apb4.pwdata[`I2S_CTRL_WIDTH-1:0] : s_i2s_ctrl_q;
@@ -122,7 +131,8 @@ module apb4_i2s #(
       .rst_n_i(i2s.aud_rst_n_i),
       .en_i   (s_bit_en),
       .div_i  (s_i2s_div_q),
-      .clk_o  (s_i2s_clk)
+      .sclk_o (s_i2s_mst_sck),
+      .ws_o   (s_i2s_mst_ws)
   );
 
 
@@ -162,4 +172,20 @@ module apb4_i2s #(
       .dat_o  (s_rx_pop_data)
   );
 
+  i2s_core u_i2s_core (
+      .clk_i     (apb4.pclk),
+      .rst_n_i   (apb4.presetn),
+      .lsb_i     (s_bit_lsb),
+      .busy_o    (s_busy),
+      .tx_valid_i(s_tx_pop_valid),
+      .tx_ready_o(s_tx_pop_ready),
+      .tx_data_i (s_tx_pop_data),
+      .rx_valid_o(s_rx_push_valid),
+      .rx_ready_i(s_rx_push_ready),
+      .rx_data_o (s_rx_push_data),
+      .i2s_sck_i (s_i2s_sck),
+      .i2s_ws_i  (s_i2s_ws),
+      .i2s_sd_o  (i2s.sd_o),
+      .i2s_sd_i  (i2s.sd_i)
+  );
 endmodule

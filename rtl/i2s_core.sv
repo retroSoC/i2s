@@ -8,5 +8,22 @@
 // MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 // See the Mulan PSL v2 for more details.
 
-module i2c_core ();
+`include "i2s_define.sv"
+
+module i2s_core (
+    input  logic                       clk_i,
+    input  logic                       rst_n_i,
+    input  logic                       lsb_i,
+    output logic                       busy_o,
+    input  logic                       tx_valid_i,
+    output logic                       tx_ready_o,
+    input  logic [`I2S_DATA_WIDTH-1:0] tx_data_i,
+    output logic                       rx_valid_o,
+    input  logic                       rx_ready_i,
+    output logic [`I2S_DATA_WIDTH-1:0] rx_data_o,
+    input  logic                       i2s_sck_i,
+    input  logic                       i2s_ws_i,
+    output logic                       i2s_sd_o,
+    input  logic                       i2s_sd_i
+);
 endmodule

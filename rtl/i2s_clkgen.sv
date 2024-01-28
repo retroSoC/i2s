@@ -15,7 +15,8 @@ module i2s_clkgen (
     input  logic                      rst_n_i,
     input  logic                      en_i,
     input  logic [`I2S_DIV_WIDTH-1:0] div_i,
-    output logic                      clk_o
+    output logic                      sclk_o,
+    output logic                      ws_o
 );
 
 endmodule
