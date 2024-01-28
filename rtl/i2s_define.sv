@@ -41,13 +41,13 @@
 
 // verilog_format: off
 `define I2S_CTRL 4'b0000 // BASEADDR + 0x00
-`define I2S_DIV 4'b0001 // BASEADDR + 0x04
+`define I2S_DIV  4'b0001 // BASEADDR + 0x04
 `define I2S_TXR  4'b0010 // BASEADDR + 0x08
 `define I2S_RXR  4'b0011 // BASEADDR + 0x0C
 `define I2S_STAT 4'b0100 // BASEADDR + 0x10
 
 `define I2S_CTRL_ADDR {26'b00, `I2S_CTRL, 2'b00}
-`define I2S_DIV_ADDR {26'b00, `I2S_DIV, 2'b00}
+`define I2S_DIV_ADDR  {26'b00, `I2S_DIV, 2'b00}
 `define I2S_TXR_ADDR  {26'b00, `I2S_TXR , 2'b00}
 `define I2S_RXR_ADDR  {26'b00, `I2S_RXR , 2'b00}
 `define I2S_STAT_ADDR {26'b00, `I2S_STAT, 2'b00}
@@ -56,7 +56,7 @@
 `define I2S_DATA_BIT_WIDTH $clog2(`I2S_DATA_WIDTH)
 
 `define I2S_CTRL_WIDTH 26
-`define I2S_DIV_WIDTH 16
+`define I2S_DIV_WIDTH  16
 `define I2S_TXR_WIDTH  `I2S_DATA_WIDTH
 `define I2S_RXR_WIDTH  `I2S_DATA_WIDTH
 `define I2S_STAT_WIDTH 5

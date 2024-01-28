@@ -130,8 +130,10 @@ module apb4_i2s #(
       .clk_i  (i2s.aud_clk_i),
       .rst_n_i(i2s.aud_rst_n_i),
       .en_i   (s_bit_en),
+      .pol_i  (s_bit_pol),
+      .chl_i  (s_bit_chl),
       .div_i  (s_i2s_div_q),
-      .sclk_o (s_i2s_mst_sck),
+      .sck_o  (s_i2s_mst_sck),
       .ws_o   (s_i2s_mst_ws)
   );
 
@@ -176,6 +178,11 @@ module apb4_i2s #(
       .clk_i     (apb4.pclk),
       .rst_n_i   (apb4.presetn),
       .lsb_i     (s_bit_lsb),
+      .wm_i      (s_bit_wm),
+      .fmt_i     (s_bit_fmt),
+      .chm_i     (s_bit_chm),
+      .chl_i     (s_bit_chl),
+      .dal_i     (s_bit_dal),
       .busy_o    (s_busy),
       .tx_valid_i(s_tx_pop_valid),
       .tx_ready_o(s_tx_pop_ready),
