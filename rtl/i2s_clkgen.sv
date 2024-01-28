@@ -11,10 +11,11 @@
 `include "i2s_define.sv"
 
 module i2s_clkgen (
-    input logic        clk_i,
-    input logic        rst_n_i,
-    input logic        en_i,
-    input logic [15:0] div_i // NOTE: replace constant def
+    input  logic                      clk_i,
+    input  logic                      rst_n_i,
+    input  logic                      en_i,
+    input  logic [`I2S_DIV_WIDTH-1:0] div_i,
+    output logic                      clk_o
 );
 
 endmodule

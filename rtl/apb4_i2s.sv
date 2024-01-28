@@ -33,6 +33,15 @@ module apb4_i2s #(
   logic [1:0] s_bit_wm, s_bit_fmt, s_bit_chm, s_bit_dal;
   logic [4:0] s_bit_txth, s_bit_rxth;
   logic s_bit_txif, s_bit_rxif, s_busy;
+  // i2s
+  logic s_i2s_clk;
+  // irq
+  logic s_busy, s_tx_irq_trg, s_rx_irq_trg;
+  // fifo
+  logic s_tx_push_valid, s_tx_push_ready, s_tx_empty, s_tx_full, s_tx_pop_valid, s_tx_pop_ready;
+  logic s_rx_push_valid, s_rx_push_ready, s_rx_empty, s_rx_full, s_rx_pop_valid, s_rx_pop_ready;
+  logic [31:0] s_tx_push_data, s_tx_pop_data, s_rx_push_data, s_rx_pop_data;
+  logic [LOG_FIFO_DEPTH:0] s_tx_elem, s_rx_elem;
 
   assign s_apb4_addr     = apb4.paddr[5:2];
   assign s_apb4_wr_hdshk = apb4.psel && apb4.penable && apb4.pwrite;
@@ -79,13 +88,78 @@ module apb4_i2s #(
   );
 
   always_comb begin
+    s_tx_push_valid = 1'b0;
+    s_tx_push_data  = '0;
+    if (s_apb4_wr_hdshk && s_apb4_addr == `I2S_TXR) begin
+      s_tx_push_valid = 1'b1;
+      unique case (s_bit_dal)
+        `I2S_DAL_8_BITS:  s_tx_push_data = apb4.pwdata[7:0];
+        `I2S_DAL_16_BITS: s_tx_push_data = apb4.pwdata[15:0];
+        `I2S_DAL_24_BITS: s_tx_push_data = apb4.pwdata[23:0];
+        `I2S_DAL_32_BITS: s_tx_push_data = apb4.pwdata[31:0];
+      endcase
+    end
+  end
+
+  always_comb begin
     apb4.prdata = '0;
     if (s_apb4_rd_hdshk) begin
       unique case (s_apb4_addr)
         `I2S_CTRL: apb4.prdata[`I2S_CTRL_WIDTH-1:0] = s_i2s_ctrl_q;
         `I2S_DIV:  apb4.prdata[`I2S_DIV_WIDTH-1:0] = s_i2s_div_q;
+        `I2S_RXR: begin
+          s_rx_pop_ready                  = 1'b1;
+          apb4.prdata[`I2S_RXR_WIDTH-1:0] = s_rx_pop_data;
+        end
+        `I2S_STAT: apb4.prdata[`I2S_STAT_WIDTH-1:0] = s_i2s_stat_q;
         default:   apb4.prdata = '0;
       endcase
     end
   end
+
+  i2s_clkgen u_i2s_clkgen (
+      .clk_i  (i2s.aud_clk_i),
+      .rst_n_i(i2s.aud_rst_n_i),
+      .en_i   (s_bit_en),
+      .div_i  (s_i2s_div_q),
+      .clk_o  (s_i2s_clk)
+  );
+
+
+  assign s_tx_push_ready = ~s_tx_full;
+  assign s_tx_pop_valid  = ~s_tx_empty;
+  fifo #(
+      .DATA_WIDTH  (32),
+      .BUFFER_DEPTH(FIFO_DEPTH)
+  ) u_tx_fifo (
+      .clk_i  (apb4.pclk),
+      .rst_n_i(apb4.presetn),
+      .flush_i(s_bit_clr),
+      .cnt_o  (s_tx_elem),
+      .push_i (s_tx_push_valid),
+      .full_o (s_tx_full),
+      .dat_i  (s_tx_push_data),
+      .pop_i  (s_tx_pop_ready),
+      .empty_o(s_tx_empty),
+      .dat_o  (s_tx_pop_data)
+  );
+
+  assign s_rx_push_ready = ~s_rx_full;
+  assign s_rx_pop_valid  = ~s_rx_empty;
+  fifo #(
+      .DATA_WIDTH  (32),
+      .BUFFER_DEPTH(FIFO_DEPTH)
+  ) u_rx_fifo (
+      .clk_i  (apb4.pclk),
+      .rst_n_i(apb4.presetn),
+      .flush_i(s_bit_clr),
+      .cnt_o  (s_rx_elem),
+      .push_i (s_rx_push_valid),
+      .full_o (s_rx_full),
+      .dat_i  (s_rx_push_data),
+      .pop_i  (s_rx_pop_ready),
+      .empty_o(s_rx_empty),
+      .dat_o  (s_rx_pop_data)
+  );
+
 endmodule
