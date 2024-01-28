@@ -21,7 +21,7 @@
 * Programmable serial clock polarity
 * Programmable prescaler
     * max division factor is up to 2^16
-    * 8KHz, 16KHz, 32KHz, 48KHz or 96KHz sample rate
+    * 8KHz, 12KHz, 16KHz, 24KHz, 32KHz, 48KHz or 96KHz sample rate
 * Stereo or left channel and right channel only mode
 * MSB-justified, LSB-justified or I2S Phillps mode
 * 8, 16, 24 or 32 bits data transmission size
