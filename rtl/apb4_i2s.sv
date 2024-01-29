@@ -36,7 +36,7 @@ module apb4_i2s #(
   // i2s
   logic s_i2s_mst_sck, s_i2s_sck, s_i2s_mst_ws, s_i2s_ws;
   // irq
-  logic s_busy, s_tx_irq_trg, s_rx_irq_trg;
+  logic s_tx_irq_trg, s_rx_irq_trg;
   // fifo
   logic s_tx_push_valid, s_tx_push_ready, s_tx_empty, s_tx_full, s_tx_pop_valid, s_tx_pop_ready;
   logic s_rx_push_valid, s_rx_push_ready, s_rx_empty, s_rx_full, s_rx_pop_valid, s_rx_pop_ready;
@@ -177,6 +177,7 @@ module apb4_i2s #(
   i2s_core u_i2s_core (
       .clk_i     (apb4.pclk),
       .rst_n_i   (apb4.presetn),
+      .en_i      (s_bit_en),
       .lsb_i     (s_bit_lsb),
       .wm_i      (s_bit_wm),
       .fmt_i     (s_bit_fmt),

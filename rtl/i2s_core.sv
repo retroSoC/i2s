@@ -36,12 +36,18 @@ module i2s_core (
 );
 
   logic [7:0] s_tran_cnt_d, s_tran_cnt_q;
-  logic [`I2S_DATA_WIDTH-1:0] s_tx_data, s_tx_32b_data, s_tx_16b_data;
-  logic s_tran_done, s_tx_trg, s_rx_trg;
+  logic [`I2S_DATA_WIDTH-1:0] s_tx_data;
+  logic [               15:0] s_tx_16b_data;
+  logic s_tran_done, s_tx_trg, s_rx_trg, s_ws_re_trg, s_ws_fe_trg, s_sck_fe_trg;
+  logic s_i2s_16b_sdo, s_i2s_32b_sdo;
 
-  assign busy_o      = en_i;  // TODO:
-  assign s_tran_done = ~(|s_tran_cnt_q);
-  assign s_tx_trg    = en_i && tx_valid_i;
+  assign busy_o        = en_i && ~s_tran_done;
+  assign tx_ready_o    = en_i && s_tran_done;
+  assign rx_valid_o    = 1'b0;
+  assign rx_data_o     = '0;
+  assign i2s_sd_o      = chl_i == `I2S_CHL_16_BITS ? s_i2s_16b_sdo : s_i2s_32b_sdo;
+  assign s_tx_16b_data = `I2S_FMT_LSB ? s_tx_data[15:0] : s_tx_data[31:16];
+  assign s_tran_done   = ~(|s_tran_cnt_q);
 
   // tx/rx counter
   always_comb begin
@@ -67,36 +73,88 @@ module i2s_core (
     unique case (fmt_i)
       `I2S_FMT_LSB: begin
         unique case (chl_i)
-          `I2S_CHL_16_BITS: s_tx_data[15:0] = tx_data_i;
-          `I2S_CHL_32_BITS: s_tx_data[31:0] = tx_data_i;
+          `I2S_CHL_16_BITS: s_tx_data = tx_data_i[15:0];
+          `I2S_CHL_32_BITS: s_tx_data = tx_data_i[31:0];
         endcase
       end
       `I2S_FMT_I2S: begin
-
+        unique case (dal_i)
+          `I2S_DAL_8_BITS:  s_tx_data[31:24] = tx_data_i[7:0];
+          `I2S_DAL_16_BITS: s_tx_data[31:16] = tx_data_i[15:0];
+          `I2S_DAL_24_BITS: s_tx_data[31:8] = tx_data_i[23:0];  // only to adopt to CHL 32bits
+          `I2S_DAL_32_BITS: s_tx_data[31:0] = tx_data_i[31:0];
+        endcase
       end
       `I2S_FMT_MSB: begin
+        unique case (dal_i)
+          `I2S_DAL_8_BITS:  s_tx_data[31:24] = tx_data_i[7:0];
+          `I2S_DAL_16_BITS: s_tx_data[31:16] = tx_data_i[15:0];
+          `I2S_DAL_24_BITS: s_tx_data[31:8] = tx_data_i[23:0];
+          `I2S_DAL_32_BITS: s_tx_data[31:0] = tx_data_i[31:0];
+        endcase
       end
       default: s_tx_data = '0;
     endcase
   end
 
-  assign tx_ready_o = s_tran_done;
-  //   for (genvar i = 1; i <= 2; i++) begin
-  //     shift_reg #(
-  //         .DATA_WIDTH(16 * i),
-  //         .SHIFT_NUM (1)
-  //     ) u_i2s_tx_shift_reg (
-  //         .clk_i     (clk_i),
-  //         .rst_n_i   (rst_n_i),
-  //         .type_i    (`SHIFT_REG_TYPE_LOGIC),
-  //         .dir_i     ({1'b0, lsb_i}),
-  //         .ld_en_i   (tx_valid_i && tx_ready_o),
-  //         .sft_en_i  (s_tx_trg),
-  //         .ser_dat_i (1'b0),
-  //         .par_data_i(tx_data_i[16*i-1:0]),
-  //         .ser_dat_o (i2s_sd_o),
-  //         .par_data_o()
-  //     );
-  //   end
+  edge_det_sync_re #(
+      .DATA_WIDTH(1)
+  ) u_ws_re (
+      clk_i,
+      rst_n_i,
+      i2s_ws_i,
+      s_ws_re_trg
+  );
+
+  edge_det_sync_fe #(
+      .DATA_WIDTH(1)
+  ) u_ws_fe (
+      clk_i,
+      rst_n_i,
+      i2s_ws_i,
+      s_ws_fe_trg
+  );
+
+  edge_det_sync_fe #(
+      .DATA_WIDTH(1)
+  ) u_sck_fe (
+      clk_i,
+      rst_n_i,
+      i2s_sck_i,
+      s_sck_fe_trg
+  );
+
+  assign s_tx_trg = en_i && wm_i == `I2S_WM_SEND && s_sck_fe_trg && ~s_tran_done;
+  shift_reg #(
+      .DATA_WIDTH(16),
+      .SHIFT_NUM (1)
+  ) u_i2s_tx_16b_shift_reg (
+      .clk_i     (clk_i),
+      .rst_n_i   (rst_n_i),
+      .type_i    (`SHIFT_REG_TYPE_LOGIC),
+      .dir_i     ({1'b0, lsb_i}),
+      .ld_en_i   (tx_valid_i && tx_ready_o),
+      .sft_en_i  (s_tx_trg),
+      .ser_dat_i (1'b0),
+      .par_data_i(s_tx_16b_data),
+      .ser_dat_o (s_i2s_16b_sdo),
+      .par_data_o()
+  );
+
+  shift_reg #(
+      .DATA_WIDTH(32),
+      .SHIFT_NUM (1)
+  ) u_i2s_tx_32b_shift_reg (
+      .clk_i     (clk_i),
+      .rst_n_i   (rst_n_i),
+      .type_i    (`SHIFT_REG_TYPE_LOGIC),
+      .dir_i     ({1'b0, lsb_i}),
+      .ld_en_i   (tx_valid_i && tx_ready_o),
+      .sft_en_i  (s_tx_trg),
+      .ser_dat_i (1'b0),
+      .par_data_i(s_tx_data),
+      .ser_dat_o (s_i2s_32b_sdo),
+      .par_data_o()
+  );
 
 endmodule
