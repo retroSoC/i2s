@@ -13,12 +13,22 @@
 
 module apb4_i2s_tb ();
   localparam CLK_PEROID = 10;
+  localparam AUD_CLK_PEROID = 40;  // for sim
+
   logic rst_n_i, clk_i;
+  logic aud_rst_n_i, aud_clk_i;
 
   initial begin
     clk_i = 1'b0;
     forever begin
       #(CLK_PEROID / 2) clk_i <= ~clk_i;
+    end
+  end
+
+  initial begin
+    aud_clk_i = 1'b0;
+    forever begin
+      #(AUD_CLK_PEROID / 2) aud_clk_i <= ~aud_clk_i;
     end
   end
 
@@ -28,8 +38,18 @@ module apb4_i2s_tb ();
     #1 rst_n_i = 1'b1;
   endtask
 
+  task aud_sim_reset(int delay);
+    aud_rst_n_i = 1'b0;
+    repeat (delay) @(posedge aud_clk_i);
+    #1 aud_rst_n_i = 1'b1;
+  endtask
+
   initial begin
     sim_reset(40);
+  end
+
+  initial begin
+    aud_sim_reset(60);
   end
 
   apb4_if u_apb4_if (
@@ -37,7 +57,10 @@ module apb4_i2s_tb ();
       rst_n_i
   );
 
-  i2s_if u_i2s_if ();
+  i2s_if u_i2s_if (
+      aud_clk_i,
+      aud_rst_n_i
+  );
 
   test_top u_test_top (
       .apb4(u_apb4_if.master),
