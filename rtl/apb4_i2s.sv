@@ -74,7 +74,10 @@ module apb4_i2s #(
   assign i2s.ws_en_o     = ~s_bit_msr;
   assign s_i2s_sck       = s_bit_msr ? s_i2s_mst_sck : i2s.sck_i;
   assign s_i2s_ws        = s_bit_msr ? s_i2s_mst_ws : i2s.ws_i;
-  assign i2s.irq_o       = 1'b0;  // TODO:
+  // irq
+  assign s_tx_irq_trg    = s_bit_txth > s_tx_elem;
+  assign s_rx_irq_trg    = s_bit_rxth < s_rx_elem;
+  assign i2s.irq_o       = s_bit_txif | s_bit_rxif;
 
   assign s_i2s_ctrl_en   = s_apb4_wr_hdshk && s_apb4_addr == `I2S_CTRL && ~s_busy;
   assign s_i2s_ctrl_d    = s_i2s_ctrl_en ? apb4.pwdata[`I2S_CTRL_WIDTH-1:0] : s_i2s_ctrl_q;
@@ -109,6 +112,27 @@ module apb4_i2s #(
       endcase
     end
   end
+
+  always_comb begin
+    s_i2s_stat_d[4] = ~s_rx_pop_valid;
+    s_i2s_stat_d[3] = ~s_tx_push_ready;
+    s_i2s_stat_d[2] = s_busy;
+    if ((s_bit_txif || s_bit_rxif) && s_apb4_rd_hdshk && s_apb4_addr == `I2S_STAT) begin
+      s_i2s_stat_d[1:0] = 2'b0;
+    end else if (~s_bit_txif && s_bit_en && s_bit_txie && s_tx_irq_trg) begin
+      s_i2s_stat_d[1:0] = {s_bit_rxif, 1'b1};
+    end else if (~s_bit_rxif && s_bit_en && s_bit_rxie && s_rx_irq_trg) begin
+      s_i2s_stat_d[1:0] = {1'b1, s_bit_txif};
+    end else begin
+      s_i2s_stat_d[1:0] = {s_bit_rxif, s_bit_txif};
+    end
+  end
+  dffr #(`I2S_STAT_WIDTH) u_i2s_stat_dffr (
+      apb4.pclk,
+      apb4.presetn,
+      s_i2s_stat_d,
+      s_i2s_stat_q
+  );
 
   always_comb begin
     apb4.prdata = '0;
