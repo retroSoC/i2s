@@ -1,18 +1,4 @@
 # I2S
-<p>
-    <a href=".">
-      <img src="https://img.shields.io/badge/RTL%20dev-in%20progress-silver?style=flat-square">
-    </a>
-    <a href=".">
-      <img src="https://img.shields.io/badge/VCS%20sim-in%20progress-silver?style=flat-square">
-    </a>
-    <a href=".">
-      <img src="https://img.shields.io/badge/FPGA%20verif-no%20start-wheat?style=flat-square">
-    </a>
-    <a href=".">
-      <img src="https://img.shields.io/badge/Tapeout%20test-no%20start-wheat?style=flat-square">
-    </a>
-</p>
 
 ## Features
 * Compatible with Phillps I2S standard
@@ -31,6 +17,8 @@
 * Maskable send or receive interrupt and programmable threshold
 * Static synchronous design
 * Full synthesizable
+
+FULL vision of datatsheet can be found in [datasheet.md](./doc/datasheet.md).
 
 ## Build and Test
 ```bash
