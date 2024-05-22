@@ -13,12 +13,13 @@
 `include "i2s_define.sv"
 
 module apb4_i2s #(
-    parameter int FIFO_DEPTH     = 64,
-    parameter int LOG_FIFO_DEPTH = $clog2(FIFO_DEPTH)
+    parameter int FIFO_DEPTH = 64
 ) (
     apb4_if.slave apb4,
     i2s_if.dut    i2s
 );
+
+  localparam int LOG_FIFO_DEPTH = $clog2(FIFO_DEPTH);
 
   logic [3:0] s_apb4_addr;
   logic s_apb4_wr_hdshk, s_apb4_rd_hdshk;
@@ -80,7 +81,7 @@ module apb4_i2s #(
   assign i2s.irq_o       = s_bit_txif | s_bit_rxif;
 
   assign s_i2s_ctrl_en   = s_apb4_wr_hdshk && s_apb4_addr == `I2S_CTRL && ~s_busy;
-  assign s_i2s_ctrl_d    = s_i2s_ctrl_en ? apb4.pwdata[`I2S_CTRL_WIDTH-1:0] : s_i2s_ctrl_q;
+  assign s_i2s_ctrl_d    = apb4.pwdata[`I2S_CTRL_WIDTH-1:0];
   dffer #(`I2S_CTRL_WIDTH) u_i2s_ctrl_dffer (
       apb4.pclk,
       apb4.presetn,
@@ -90,7 +91,7 @@ module apb4_i2s #(
   );
 
   assign s_i2s_div_en = s_apb4_wr_hdshk && s_apb4_addr == `I2S_DIV && ~s_busy;
-  assign s_i2s_div_d  = s_i2s_div_en ? apb4.pwdata[`I2S_DIV_WIDTH-1:0] : s_i2s_div_q;
+  assign s_i2s_div_d  = apb4.pwdata[`I2S_DIV_WIDTH-1:0];
   dffer #(`I2S_DIV_WIDTH) u_i2s_div_dffer (
       apb4.pclk,
       apb4.presetn,

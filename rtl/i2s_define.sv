@@ -11,6 +11,9 @@
 `ifndef INC_I2S_DEF_SV
 `define INC_I2S_DEF_SV
 
+// async design
+// audio clk: 12M
+
 /* register mapping
  * I2S_CTRL:
  * BITS:   | 31:26 | 25:21 | 20:16 | 15:14 | 13  | 12:11 | 10:9 | 8:7 | 6   | 5   | 4   | 3   | 2    | 1    | 0  |
@@ -25,17 +28,17 @@
  * I2S_TXR:
  * BITS:   | 31:0   |
  * FIELDS: | TXDATA |
- * PERMS:  | W      |
+ * PERMS:  | WO     |
  * ---------------------------------------------------------------------------------------------------------------
  * I2S_RXR:
  * BITS:   | 31:0   |
  * FIELDS: | RXDATA |
- * PERMS:  | R      |
+ * PERMS:  | RO     |
  * ---------------------------------------------------------------------------------------------------------------
  * I2S_STAT:
  * BITS:   | 31:5 | 4    | 3    | 2    | 1    | 0    |
  * FIELDS: | RES  | RETY | TFUL | BUSY | RXIF | TXIF |
- * PERMS:  | NONE | R    | R    | R    | R    | R    |
+ * PERMS:  | NONE | RO   | RO   | R    | R    | R    |
  * ---------------------------------------------------------------------------------------------------------------
 */
 
@@ -47,7 +50,7 @@
 `define I2S_STAT 4'b0100 // BASEADDR + 0x10
 
 `define I2S_CTRL_ADDR {26'b00, `I2S_CTRL, 2'b00}
-`define I2S_DIV_ADDR  {26'b00, `I2S_DIV, 2'b00}
+`define I2S_DIV_ADDR  {26'b00, `I2S_DIV , 2'b00}
 `define I2S_TXR_ADDR  {26'b00, `I2S_TXR , 2'b00}
 `define I2S_RXR_ADDR  {26'b00, `I2S_RXR , 2'b00}
 `define I2S_STAT_ADDR {26'b00, `I2S_STAT, 2'b00}
@@ -64,14 +67,17 @@
 `define I2S_WM_SEND 2'b00
 `define I2S_WM_RECV 2'b01
 `define I2S_WM_TEST 2'b10
+`define I2S_WM_NONE 2'b11
 
-`define I2S_FMT_I2S 2'b00
-`define I2S_FMT_MSB 2'b01
-`define I2S_FMT_LSB 2'b10
+`define I2S_FMT_I2S  2'b00
+`define I2S_FMT_MSB  2'b01
+`define I2S_FMT_LSB  2'b10
+`define I2S_FMT_NONE 2'b11
 
 `define I2S_CHM_STERO 2'b00
 `define I2S_CHM_LEFT  2'b01
 `define I2S_CHM_RIGHT 2'b10
+`define I2S_CHM_NONE  2'b11
 
 `define I2S_CHL_16_BITS 1'b0
 `define I2S_CHL_32_BITS 1'b1

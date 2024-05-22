@@ -41,7 +41,8 @@ module i2s_core (
   logic s_tran_done, s_tx_trg, s_rx_trg, s_ws_re_trg, s_ws_fe_trg, s_sck_fe_trg;
   logic s_i2s_16b_sdo, s_i2s_32b_sdo;
 
-  assign busy_o        = en_i && ~s_tran_done;
+  //   assign busy_o        = en_i && ~s_tran_done;
+  assign busy_o        = 1'b0;
   assign tx_ready_o    = en_i && s_tran_done;
   assign rx_valid_o    = 1'b0;
   assign rx_data_o     = '0;

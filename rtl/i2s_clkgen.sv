@@ -49,6 +49,12 @@ module i2s_clkgen (
       s_sck_d = ~s_sck_q;
     end
   end
+  dffr #(1) u_sck_dffr (
+      clk_i,
+      rst_n_i,
+      s_sck_d,
+      s_sck_q
+  );
 
   always_comb begin
     if (~en_i || s_ws_cnt_zero) begin
@@ -61,7 +67,7 @@ module i2s_clkgen (
     end
   end
   dffrh #(8) u_ws_cnt_dffrh (
-      clk_i,
+      s_sck_q,
       rst_n_i,
       s_ws_cnt_d,
       s_ws_cnt_q
@@ -75,5 +81,11 @@ module i2s_clkgen (
       s_ws_d = ~s_ws_q;
     end
   end
+  dffr #(1) u_ws_dffr (
+      clk_i,
+      rst_n_i,
+      s_ws_d,
+      s_ws_q
+  );
 
 endmodule
