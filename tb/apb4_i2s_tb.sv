@@ -13,7 +13,7 @@
 
 module apb4_i2s_tb ();
   localparam CLK_PEROID = 10;
-  localparam AUD_CLK_PEROID = 40;  // for sim
+  localparam AUD_CLK_PEROID = 82;  // ~12.288M just for sim
 
   logic rst_n_i, clk_i;
   logic aud_rst_n_i, aud_clk_i;

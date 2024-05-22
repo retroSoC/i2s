@@ -38,6 +38,7 @@ program automatic test_top (
     i2s_hdl.init();
     i2s_hdl.test_reset_reg();
     i2s_hdl.test_wr_rd_reg();
+    i2s_hdl.test_clk_div();
     i2s_hdl.test_irq();
 
     Helper::end_banner();

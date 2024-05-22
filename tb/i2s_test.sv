@@ -8,8 +8,8 @@
 // MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 // See the Mulan PSL v2 for more details.
 
-`ifndef INC_PWM_TEST_SV
-`define INC_PWM_TEST_SV
+`ifndef INC_I2S_TEST_SV
+`define INC_I2S_TEST_SV
 
 `include "apb4_master.sv"
 `include "i2s_define.sv"
@@ -38,7 +38,8 @@ endfunction
 task automatic I2STest::test_reset_reg();
   super.test_reset_reg();
   // verilog_format: off
-  // this.rd_check(`PWM_CTRL_ADDR, "CTRL REG", 32'b0 & {`PWM_CTRL_WIDTH{1'b1}}, Helper::EQUL, Helper::INFO);
+  this.rd_check(`I2S_CTRL_ADDR, "CTRL REG", 32'b0 & {`I2S_CTRL_WIDTH{1'b1}}, Helper::EQUL, Helper::INFO);
+  this.rd_check(`I2S_DIV_ADDR, "DIV REG", 32'b0 & {`I2S_DIV_WIDTH{1'b1}}, Helper::EQUL, Helper::INFO);
   // verilog_format: on
 endtask
 
@@ -46,13 +47,19 @@ task automatic I2STest::test_wr_rd_reg(input bit [31:0] run_times = 1000);
   super.test_wr_rd_reg();
   // verilog_format: off
   for (int i = 0; i < run_times; i++) begin
-    // this.wr_rd_check(`PWM_CTRL_ADDR, "CTRL REG", $random & {`PWM_CTRL_WIDTH{1'b1}}, Helper::EQUL);
+    this.wr_rd_check(`I2S_CTRL_ADDR, "CTRL REG", $random & {`I2S_CTRL_WIDTH{1'b1}}, Helper::EQUL);
+    this.wr_rd_check(`I2S_DIV_ADDR, "DIV REG", $random & {`I2S_DIV_WIDTH{1'b1}}, Helper::EQUL);
   end
   // verilog_format: on
 endtask
 
 task automatic I2STest::test_clk_div(input bit [31:0] run_times = 10);
   $display("=== [test i2s clk div] ===");
+  repeat (200 * 3) @(posedge this.apb4.pclk);
+  this.write(`I2S_CTRL_ADDR, 32'b0);
+  this.write(`I2S_DIV_ADDR, 32'h2);
+  repeat (100) @(posedge this.apb4.pclk);
+  this.write(`I2S_CTRL_ADDR, 32'b1_0001);
 endtask
 
 task automatic I2STest::test_irq(input bit [31:0] run_times = 10);
