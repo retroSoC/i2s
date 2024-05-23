@@ -11,6 +11,7 @@
 `include "i2s_define.sv"
 
 // MCLK(clk_i) / LRCK(ws_o) is constant value(256, 384, 512, 768, 1024)
+// first left chnl(ws=0), second right chnl(ws=1)
 module i2s_clkgen (
     input  logic                      clk_i,
     input  logic                      rst_n_i,
@@ -31,10 +32,11 @@ module i2s_clkgen (
   assign sck_o          = s_sck_q;
   assign ws_o           = s_ws_q;
   assign s_sck_cnt_zero = s_sck_cnt_q == '0;
+  assign s_sck_cnt_one  = s_sck_cnt_q == 16'd1;
   assign s_ws_cnt_zero  = s_ws_cnt_q == '0;
 
   assign s_sck_cnt_d    = (~en_i || s_sck_cnt_zero) ? div_i : s_sck_cnt_q - 1'b1;
-  dffrh #(`I2S_DIV_WIDTH) u_sck_cnt_dffrh (
+  dffr #(`I2S_DIV_WIDTH) u_sck_cnt_dffr (
       clk_i,
       rst_n_i,
       s_sck_cnt_d,
@@ -57,17 +59,18 @@ module i2s_clkgen (
   );
 
   always_comb begin
+    s_ws_cnt_d = s_ws_cnt_q;
     if (~en_i || s_ws_cnt_zero) begin
       unique case (chl_i)
-        `I2S_CHL_16_BITS: s_ws_cnt_d = 8'd15;
-        `I2S_CHL_32_BITS: s_ws_cnt_d = 8'd31;
+        `I2S_CHL_16_BITS: s_ws_cnt_d = 8'd63;
+        `I2S_CHL_32_BITS: s_ws_cnt_d = 8'd127;
       endcase
     end else begin
       s_ws_cnt_d = s_ws_cnt_q - 1'b1;
     end
   end
-  dffrh #(8) u_ws_cnt_dffrh (
-      s_sck_q,
+  dffr #(8) u_ws_cnt_dffr (
+      clk_i,
       rst_n_i,
       s_ws_cnt_d,
       s_ws_cnt_q

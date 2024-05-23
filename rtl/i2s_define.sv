@@ -11,9 +11,12 @@
 `ifndef INC_I2S_DEF_SV
 `define INC_I2S_DEF_SV
 
-// async design
-// audio clk: 12M
-
+// aync design
+// audio and apb4 clk: 12.288M(mclk)
+// div only support 256, 384, 512, 768, 1024
+// clk gen: gen the ws(mclk/div) -> sck(mclk/div*2*(16/32))
+// or sck(mclk/sckdiv) -> ws(mclk/sckdiv/2*(16/32))
+// sckdiv: div / (2*16/32)
 /* register mapping
  * I2S_CTRL:
  * BITS:   | 31:26 | 25:21 | 20:16 | 15:14 | 13  | 12:11 | 10:9 | 8:7 | 6   | 5   | 4   | 3   | 2    | 1    | 0  |
@@ -21,9 +24,9 @@
  * PERMS:  | NONE  | RW    | RW    | RW    | RW  | RW    | RW   | RW  | RW  | RW  | RW  | RW  | RW   | RW   | RW |
  * ---------------------------------------------------------------------------------------------------------------
  * I2S_DIV:
- * BITS:   | 31:16 | 15:0 |
- * FIELDS: | RES   | DIV  |
- * PERMS:  | NONE  | RW   |
+ * BITS:   | 31:16 | 15:0   |
+ * FIELDS: | RES   | SCKDIV |
+ * PERMS:  | NONE  | RW     |
  * ---------------------------------------------------------------------------------------------------------------
  * I2S_TXR:
  * BITS:   | 31:0   |
@@ -38,7 +41,7 @@
  * I2S_STAT:
  * BITS:   | 31:5 | 4    | 3    | 2    | 1    | 0    |
  * FIELDS: | RES  | RETY | TFUL | BUSY | RXIF | TXIF |
- * PERMS:  | NONE | RO   | RO   | R    | R    | R    |
+ * PERMS:  | NONE | RO   | RO   | RO   | R    | R    |
  * ---------------------------------------------------------------------------------------------------------------
 */
 

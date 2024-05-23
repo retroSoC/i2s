@@ -162,7 +162,6 @@ module apb4_i2s #(
       .ws_o   (s_i2s_mst_ws)
   );
 
-
   assign s_tx_push_ready = ~s_tx_full;
   assign s_tx_pop_valid  = ~s_tx_empty;
   fifo #(

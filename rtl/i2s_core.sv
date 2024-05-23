@@ -35,4 +35,9 @@ module i2s_core (
     input  logic                       i2s_sd_i
 );
 
+  assign busy_o     = '0;
+  assign tx_ready_o = '0;
+  assign rx_valid_o = '0;
+  assign rx_data_o  = '0;
+  assign i2s_sd_o   = '0;
 endmodule
