@@ -13,7 +13,7 @@
 
 module apb4_i2s_tb ();
   localparam CLK_PEROID = 10;
-  localparam AUD_CLK_PEROID = 82;  // ~12.288M just for sim
+  real AUD_CLK_PEROID = 81.38;  // ~12.288M just for sim
 
   logic rst_n_i, clk_i;
   logic aud_rst_n_i, aud_clk_i;
@@ -53,8 +53,8 @@ module apb4_i2s_tb ();
   end
 
   apb4_if u_apb4_if (
-      clk_i,
-      rst_n_i
+      aud_clk_i,
+      aud_rst_n_i
   );
 
   i2s_if u_i2s_if (

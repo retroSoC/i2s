@@ -55,9 +55,9 @@ endtask
 
 task automatic I2STest::test_clk_div(input bit [31:0] run_times = 10);
   $display("=== [test i2s clk div] ===");
-  repeat (200 * 3) @(posedge this.apb4.pclk);
+  repeat (2000 * 6) @(posedge this.apb4.pclk);
   this.write(`I2S_CTRL_ADDR, 32'b0);
-  this.write(`I2S_DIV_ADDR, 32'h2);
+  this.write(`I2S_DIV_ADDR, 32'd1);
   repeat (100) @(posedge this.apb4.pclk);
   this.write(`I2S_CTRL_ADDR, 32'b1_0001);
 endtask
