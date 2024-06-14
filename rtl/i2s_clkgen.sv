@@ -32,7 +32,6 @@ module i2s_clkgen (
   assign sck_o          = s_sck_q;
   assign ws_o           = s_ws_q;
   assign s_sck_cnt_zero = s_sck_cnt_q == '0;
-  assign s_sck_cnt_one  = s_sck_cnt_q == 16'd1;
   assign s_ws_cnt_zero  = s_ws_cnt_q == '0;
 
   assign s_sck_cnt_d    = (~en_i || s_sck_cnt_zero) ? div_i : s_sck_cnt_q - 1'b1;

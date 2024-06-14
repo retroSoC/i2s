@@ -41,7 +41,7 @@
  * I2S_STAT:
  * BITS:   | 31:5 | 4    | 3    | 2    | 1    | 0    |
  * FIELDS: | RES  | RETY | TFUL | BUSY | RXIF | TXIF |
- * PERMS:  | NONE | RO   | RO   | RO   | R    | R    |
+ * PERMS:  | NONE | RO   | RO   | RO   | RC   | RC   |
  * ---------------------------------------------------------------------------------------------------------------
 */
 
@@ -91,10 +91,7 @@
 `define I2S_DAL_32_BITS 2'b11
 // verilog_format: on
 
-interface i2s_if (
-    input logic aud_clk_i,
-    input logic aud_rst_n_i
-);
+interface i2s_if ();
   logic mclk_o;
   logic sck_o;
   logic sck_i;
@@ -107,8 +104,6 @@ interface i2s_if (
   logic irq_o;
 
   modport dut(
-      input aud_clk_i,
-      input aud_rst_n_i,
       output mclk_o,
       output sck_o,
       input sck_i,
@@ -122,8 +117,6 @@ interface i2s_if (
   );
 
   modport tb(
-      input aud_clk_i,
-      input aud_rst_n_i,
       input mclk_o,
       input sck_o,
       output sck_i,

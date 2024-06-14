@@ -68,7 +68,7 @@ module apb4_i2s #(
   assign s_bit_rxif      = s_i2s_stat_q[1];
 
   // i2s if
-  assign i2s.mclk_o      = s_bit_msr ? i2s.aud_clk_i : 1'b0;
+  assign i2s.mclk_o      = s_bit_msr ? apb4.pclk : 1'b0;
   assign i2s.sck_o       = s_bit_msr ? s_i2s_mst_sck : 1'b0;
   assign i2s.sck_en_o    = ~s_bit_msr;
   assign i2s.ws_o        = s_bit_msr ? s_i2s_mst_ws : 1'b0;
@@ -115,8 +115,8 @@ module apb4_i2s #(
   end
 
   always_comb begin
-    s_i2s_stat_d[4] = ~s_rx_pop_valid;
-    s_i2s_stat_d[3] = ~s_tx_push_ready;
+    s_i2s_stat_d[4] = s_rx_empty;
+    s_i2s_stat_d[3] = s_tx_full;
     s_i2s_stat_d[2] = s_busy;
     if ((s_bit_txif || s_bit_rxif) && s_apb4_rd_hdshk && s_apb4_addr == `I2S_STAT) begin
       s_i2s_stat_d[1:0] = 2'b0;
@@ -152,8 +152,8 @@ module apb4_i2s #(
   end
 
   i2s_clkgen u_i2s_clkgen (
-      .clk_i  (i2s.aud_clk_i),
-      .rst_n_i(i2s.aud_rst_n_i),
+      .clk_i  (apb4.pclk),
+      .rst_n_i(apb4.presetn),
       .en_i   (s_bit_en),
       .pol_i  (s_bit_pol),
       .chl_i  (s_bit_chl),
