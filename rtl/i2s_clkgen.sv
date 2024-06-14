@@ -17,7 +17,7 @@ module i2s_clkgen (
     input  logic                      rst_n_i,
     input  logic                      en_i,
     input  logic                      pol_i,
-    input  logic                      chl_i,
+    input  logic [               1:0] chl_i,
     input  logic [`I2S_DIV_WIDTH-1:0] div_i,
     output logic                      sck_o,
     output logic                      ws_o
@@ -61,8 +61,11 @@ module i2s_clkgen (
     s_ws_cnt_d = s_ws_cnt_q;
     if (~en_i || s_ws_cnt_zero) begin
       unique case (chl_i)
+        `I2S_CHL_8_BITS:  s_ws_cnt_d = 8'd31;
         `I2S_CHL_16_BITS: s_ws_cnt_d = 8'd63;
+        `I2S_CHL_24_BITS: s_ws_cnt_d = 8'd95;
         `I2S_CHL_32_BITS: s_ws_cnt_d = 8'd127;
+        default:          s_ws_cnt_d = 8'd31;
       endcase
     end else begin
       s_ws_cnt_d = s_ws_cnt_q - 1'b1;
@@ -78,7 +81,7 @@ module i2s_clkgen (
   always_comb begin
     s_ws_d = s_ws_q;
     if (~en_i) begin
-      s_ws_d = pol_i;
+      s_ws_d = ~pol_i;
     end else if (en_i && s_ws_cnt_zero) begin
       s_ws_d = ~s_ws_q;
     end

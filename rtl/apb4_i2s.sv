@@ -30,8 +30,8 @@ module apb4_i2s #(
   logic [`I2S_STAT_WIDTH-1:0] s_i2s_stat_d, s_i2s_stat_q;
   // bit
   logic s_bit_en, s_bit_txie, s_bit_rxie, s_bit_clr, s_bit_msr;
-  logic s_bit_pol, s_bit_lsb, s_bit_chl;
-  logic [1:0] s_bit_wm, s_bit_fmt, s_bit_chm, s_bit_dal;
+  logic s_bit_pol, s_bit_lsb;
+  logic [1:0] s_bit_wm, s_bit_fmt, s_bit_chl, s_bit_chm;
   logic [4:0] s_bit_txth, s_bit_rxth;
   logic s_bit_txif, s_bit_rxif, s_busy;
   // i2s
@@ -60,10 +60,9 @@ module apb4_i2s #(
   assign s_bit_wm        = s_i2s_ctrl_q[8:7];
   assign s_bit_fmt       = s_i2s_ctrl_q[10:9];
   assign s_bit_chm       = s_i2s_ctrl_q[12:11];
-  assign s_bit_chl       = s_i2s_ctrl_q[13];
-  assign s_bit_dal       = s_i2s_ctrl_q[15:14];
-  assign s_bit_txth      = s_i2s_ctrl_q[20:16];
-  assign s_bit_rxth      = s_i2s_ctrl_q[25:21];
+  assign s_bit_chl       = s_i2s_ctrl_q[14:13];
+  assign s_bit_txth      = s_i2s_ctrl_q[19:15];
+  assign s_bit_rxth      = s_i2s_ctrl_q[24:20];
   assign s_bit_txif      = s_i2s_stat_q[0];
   assign s_bit_rxif      = s_i2s_stat_q[1];
 
@@ -105,11 +104,11 @@ module apb4_i2s #(
     s_tx_push_data  = '0;
     if (s_apb4_wr_hdshk && s_apb4_addr == `I2S_TXR) begin
       s_tx_push_valid = 1'b1;
-      unique case (s_bit_dal)
-        `I2S_DAL_8_BITS:  s_tx_push_data = apb4.pwdata[7:0];
-        `I2S_DAL_16_BITS: s_tx_push_data = apb4.pwdata[15:0];
-        `I2S_DAL_24_BITS: s_tx_push_data = apb4.pwdata[23:0];
-        `I2S_DAL_32_BITS: s_tx_push_data = apb4.pwdata[31:0];
+      unique case (s_bit_chl)
+        `I2S_CHL_8_BITS:  s_tx_push_data = apb4.pwdata[7:0];
+        `I2S_CHL_16_BITS: s_tx_push_data = apb4.pwdata[15:0];
+        `I2S_CHL_24_BITS: s_tx_push_data = apb4.pwdata[23:0];
+        `I2S_CHL_32_BITS: s_tx_push_data = apb4.pwdata[31:0];
       endcase
     end
   end
@@ -199,7 +198,7 @@ module apb4_i2s #(
   );
 
   i2s_core u_i2s_core (
-      .clk_i     (apb4.pclk),
+      .clk_i     (s_i2s_sck),
       .rst_n_i   (apb4.presetn),
       .en_i      (s_bit_en),
       .lsb_i     (s_bit_lsb),
@@ -207,7 +206,6 @@ module apb4_i2s #(
       .fmt_i     (s_bit_fmt),
       .chm_i     (s_bit_chm),
       .chl_i     (s_bit_chl),
-      .dal_i     (s_bit_dal),
       .busy_o    (s_busy),
       .tx_valid_i(s_tx_pop_valid),
       .tx_ready_o(s_tx_pop_ready),
@@ -215,7 +213,6 @@ module apb4_i2s #(
       .rx_valid_o(s_rx_push_valid),
       .rx_ready_i(s_rx_push_ready),
       .rx_data_o (s_rx_push_data),
-      .i2s_sck_i (s_i2s_sck),
       .i2s_ws_i  (s_i2s_ws),
       .i2s_sd_o  (i2s.sd_o),
       .i2s_sd_i  (i2s.sd_i)
