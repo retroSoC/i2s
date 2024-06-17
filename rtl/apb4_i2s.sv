@@ -33,7 +33,7 @@ module apb4_i2s #(
   logic s_bit_pol, s_bit_lsb;
   logic [1:0] s_bit_wm, s_bit_fmt, s_bit_chl, s_bit_dtl, s_bit_chm;
   logic [4:0] s_bit_txth, s_bit_rxth;
-  logic s_bit_txif, s_bit_rxif, s_busy;
+  logic s_bit_txif, s_bit_rxif, s_busy, s_chd;
   // i2s
   logic s_i2s_mst_sck, s_i2s_sck, s_i2s_mst_ws, s_i2s_ws;
   // irq
@@ -115,6 +115,7 @@ module apb4_i2s #(
   end
 
   always_comb begin
+    s_i2s_stat_d[5] = s_chd;
     s_i2s_stat_d[4] = s_rx_empty;
     s_i2s_stat_d[3] = s_tx_full;
     s_i2s_stat_d[2] = s_busy;
@@ -208,6 +209,7 @@ module apb4_i2s #(
       .chm_i     (s_bit_chm),
       .chl_i     (s_bit_chl),
       .busy_o    (s_busy),
+      .chd_o     (s_chd),
       .tx_valid_i(s_tx_pop_valid),
       .tx_ready_o(s_tx_pop_ready),
       .tx_data_i (s_tx_pop_data),

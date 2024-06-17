@@ -67,11 +67,11 @@ task automatic I2STest::test_send(input bit [31:0] run_times = 10);
   $display("=== [test i2s send] ===");
   repeat (200 * 6) @(posedge this.apb4.pclk);
   this.write(`I2S_CTRL_ADDR, 32'b0);
-  this.write(`I2S_DIV_ADDR, 32'd1); // just for test
+  this.write(`I2S_DIV_ADDR, 32'd1); // just for test div4
   repeat (100) @(posedge this.apb4.pclk);
   this.write(`I2S_CTRL_ADDR, 32'b0_0001);
   repeat (50) @(posedge this.apb4.pclk);
-  this.write(`I2S_TXR_ADDR, 32'b1011);
+  this.write(`I2S_TXR_ADDR, 32'b1010_1011);
 endtask
 
 task automatic I2STest::test_irq(input bit [31:0] run_times = 10);

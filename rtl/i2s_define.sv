@@ -39,9 +39,9 @@
  * PERMS:  | RO     |
  * ---------------------------------------------------------------------------------------------------------------
  * I2S_STAT:
- * BITS:   | 31:5 | 4    | 3    | 2    | 1    | 0    |
- * FIELDS: | RES  | RETY | TFUL | BUSY | RXIF | TXIF |
- * PERMS:  | NONE | RO   | RO   | RO   | RC   | RC   |
+ * BITS:   | 31:6 | 5   | 4    | 3    | 2    | 1    | 0    |
+ * FIELDS: | RES  | CHD | RETY | TFUL | BUSY | RXIF | TXIF |
+ * PERMS:  | NONE | RO  | RO   | RO   | RO   | RC   | RC   |
  * ---------------------------------------------------------------------------------------------------------------
 */
 
@@ -65,7 +65,7 @@
 `define I2S_DIV_WIDTH  16
 `define I2S_TXR_WIDTH  `I2S_DATA_WIDTH
 `define I2S_RXR_WIDTH  `I2S_DATA_WIDTH
-`define I2S_STAT_WIDTH 5
+`define I2S_STAT_WIDTH 6
 
 `define I2S_WM_SEND 2'b00
 `define I2S_WM_RECV 2'b01
@@ -86,6 +86,10 @@
 `define I2S_DAT_16_BITS 2'b01
 `define I2S_DAT_24_BITS 2'b10
 `define I2S_DAT_32_BITS 2'b11
+
+`define I2S_FSM_IDLE 1'b0
+`define I2S_FSM_BUSY 1'b1
+
 // verilog_format: on
 
 interface i2s_if ();
