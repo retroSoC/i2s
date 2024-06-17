@@ -29,9 +29,9 @@ module apb4_i2s #(
   logic s_i2s_div_en;
   logic [`I2S_STAT_WIDTH-1:0] s_i2s_stat_d, s_i2s_stat_q;
   // bit
-  logic s_bit_en, s_bit_txie, s_bit_rxie, s_bit_clr, s_bit_msr;
+  logic s_bit_en, s_bit_txie, s_bit_rxie, s_bit_clr, s_bit_lsr;
   logic s_bit_pol, s_bit_lsb;
-  logic [1:0] s_bit_wm, s_bit_fmt, s_bit_chl, s_bit_chm;
+  logic [1:0] s_bit_wm, s_bit_fmt, s_bit_chl, s_bit_dtl, s_bit_chm;
   logic [4:0] s_bit_txth, s_bit_rxth;
   logic s_bit_txif, s_bit_rxif, s_busy;
   // i2s
@@ -54,26 +54,27 @@ module apb4_i2s #(
   assign s_bit_txie      = s_i2s_ctrl_q[1];
   assign s_bit_rxie      = s_i2s_ctrl_q[2];
   assign s_bit_clr       = s_i2s_ctrl_q[3];
-  assign s_bit_msr       = s_i2s_ctrl_q[4];
+  assign s_bit_lsr       = s_i2s_ctrl_q[4];
   assign s_bit_pol       = s_i2s_ctrl_q[5];
   assign s_bit_lsb       = s_i2s_ctrl_q[6];
   assign s_bit_wm        = s_i2s_ctrl_q[8:7];
   assign s_bit_fmt       = s_i2s_ctrl_q[10:9];
   assign s_bit_chm       = s_i2s_ctrl_q[12:11];
   assign s_bit_chl       = s_i2s_ctrl_q[14:13];
-  assign s_bit_txth      = s_i2s_ctrl_q[19:15];
-  assign s_bit_rxth      = s_i2s_ctrl_q[24:20];
+  assign s_bit_dtl       = s_i2s_ctrl_q[16:15];
+  assign s_bit_txth      = s_i2s_ctrl_q[21:17];
+  assign s_bit_rxth      = s_i2s_ctrl_q[26:22];
   assign s_bit_txif      = s_i2s_stat_q[0];
   assign s_bit_rxif      = s_i2s_stat_q[1];
 
   // i2s if
-  assign i2s.mclk_o      = s_bit_msr ? apb4.pclk : 1'b0;
-  assign i2s.sck_o       = s_bit_msr ? s_i2s_mst_sck : 1'b0;
-  assign i2s.sck_en_o    = ~s_bit_msr;
-  assign i2s.ws_o        = s_bit_msr ? s_i2s_mst_ws : 1'b0;
-  assign i2s.ws_en_o     = ~s_bit_msr;
-  assign s_i2s_sck       = s_bit_msr ? s_i2s_mst_sck : i2s.sck_i;
-  assign s_i2s_ws        = s_bit_msr ? s_i2s_mst_ws : i2s.ws_i;
+  assign i2s.mclk_o      = s_bit_lsr ? 1'b0 : apb4.pclk;
+  assign i2s.sck_o       = s_bit_lsr ? 1'b0 : s_i2s_mst_sck;
+  assign i2s.sck_en_o    = s_bit_lsr;
+  assign i2s.ws_o        = s_bit_lsr ? 1'b0 : s_i2s_mst_ws;
+  assign i2s.ws_en_o     = s_bit_lsr;
+  assign s_i2s_sck       = s_bit_lsr ? i2s.sck_i : s_i2s_mst_sck;
+  assign s_i2s_ws        = s_bit_lsr ? i2s.ws_i : s_i2s_mst_ws;
   // irq
   assign s_tx_irq_trg    = s_bit_txth > s_tx_elem;
   assign s_rx_irq_trg    = s_bit_rxth < s_rx_elem;
@@ -104,11 +105,11 @@ module apb4_i2s #(
     s_tx_push_data  = '0;
     if (s_apb4_wr_hdshk && s_apb4_addr == `I2S_TXR) begin
       s_tx_push_valid = 1'b1;
-      unique case (s_bit_chl)
-        `I2S_CHL_8_BITS:  s_tx_push_data = apb4.pwdata[7:0];
-        `I2S_CHL_16_BITS: s_tx_push_data = apb4.pwdata[15:0];
-        `I2S_CHL_24_BITS: s_tx_push_data = apb4.pwdata[23:0];
-        `I2S_CHL_32_BITS: s_tx_push_data = apb4.pwdata[31:0];
+      unique case (s_bit_dtl)
+        `I2S_DAT_8_BITS:  s_tx_push_data = {apb4.pwdata[7:0], 24'b0};
+        `I2S_DAT_16_BITS: s_tx_push_data = {apb4.pwdata[15:0], 16'b0};
+        `I2S_DAT_24_BITS: s_tx_push_data = {apb4.pwdata[23:0], 8'b0};
+        `I2S_DAT_32_BITS: s_tx_push_data = apb4.pwdata[31:0];
       endcase
     end
   end
@@ -198,7 +199,7 @@ module apb4_i2s #(
   );
 
   i2s_core u_i2s_core (
-      .clk_i     (s_i2s_sck),
+      .clk_i     (apb4.pclk),
       .rst_n_i   (apb4.presetn),
       .en_i      (s_bit_en),
       .lsb_i     (s_bit_lsb),
@@ -213,6 +214,7 @@ module apb4_i2s #(
       .rx_valid_o(s_rx_push_valid),
       .rx_ready_i(s_rx_push_ready),
       .rx_data_o (s_rx_push_data),
+      .i2s_sck_i (s_i2s_sck),
       .i2s_ws_i  (s_i2s_ws),
       .i2s_sd_o  (i2s.sd_o),
       .i2s_sd_i  (i2s.sd_i)

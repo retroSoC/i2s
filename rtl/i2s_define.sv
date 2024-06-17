@@ -19,9 +19,9 @@
 // sckdiv: div / (2*16/32)
 /* register mapping
  * I2S_CTRL:
- * BITS:   | 31:25 | 24:20 | 19:15 | 14:13 | 12:11 | 10:9 | 8:7 | 6   | 5   | 4   | 3   | 2    | 1    | 0  |
- * FIELDS: | RES   | RXTH  | TXTH  | CHL   | CHM   | FMT  | WM  | LSB | POL | MSR | CLR | RXIE | TXIE | EN |
- * PERMS:  | NONE  | RW    | RW    | RW    | RW    | RW   | RW  | RW  | RW  | RW  | RW  | RW   | RW   | RW |
+ * BITS:   | 31:27 | 26:22 | 21:17 | 16:15 | 14:13 | 12:11 | 10:9 | 8:7 | 6   | 5   | 4   | 3   | 2    | 1    | 0  |
+ * FIELDS: | RES   | RXTH  | TXTH  | DTL   | CHL   | CHM   | FMT  | WM  | LSB | POL | LSR | CLR | RXIE | TXIE | EN |
+ * PERMS:  | NONE  | RW    | RW    | RW    | RW    | RW    | RW   | RW  | RW  | RW  | RW  | RW  | RW   | RW   | RW |
  * ---------------------------------------------------------------------------------------------------------------
  * I2S_DIV:
  * BITS:   | 31:16 | 15:0   |
@@ -61,7 +61,7 @@
 `define I2S_DATA_WIDTH 32
 `define I2S_DATA_BIT_WIDTH $clog2(`I2S_DATA_WIDTH)
 
-`define I2S_CTRL_WIDTH 25
+`define I2S_CTRL_WIDTH 27
 `define I2S_DIV_WIDTH  16
 `define I2S_TXR_WIDTH  `I2S_DATA_WIDTH
 `define I2S_RXR_WIDTH  `I2S_DATA_WIDTH
@@ -82,10 +82,10 @@
 `define I2S_CHM_RIGHT 2'b10
 `define I2S_CHM_NONE  2'b11
 
-`define I2S_CHL_8_BITS  2'b00
-`define I2S_CHL_16_BITS 2'b01
-`define I2S_CHL_24_BITS 2'b10
-`define I2S_CHL_32_BITS 2'b11
+`define I2S_DAT_8_BITS  2'b00
+`define I2S_DAT_16_BITS 2'b01
+`define I2S_DAT_24_BITS 2'b10
+`define I2S_DAT_32_BITS 2'b11
 // verilog_format: on
 
 interface i2s_if ();

@@ -61,10 +61,10 @@ module i2s_clkgen (
     s_ws_cnt_d = s_ws_cnt_q;
     if (~en_i || s_ws_cnt_zero) begin
       unique case (chl_i)
-        `I2S_CHL_8_BITS:  s_ws_cnt_d = 8'd31;
-        `I2S_CHL_16_BITS: s_ws_cnt_d = 8'd63;
-        `I2S_CHL_24_BITS: s_ws_cnt_d = 8'd95;
-        `I2S_CHL_32_BITS: s_ws_cnt_d = 8'd127;
+        `I2S_DAT_8_BITS:  s_ws_cnt_d = 8'd31;
+        `I2S_DAT_16_BITS: s_ws_cnt_d = 8'd63;
+        `I2S_DAT_24_BITS: s_ws_cnt_d = 8'd95;
+        `I2S_DAT_32_BITS: s_ws_cnt_d = 8'd127;
         default:          s_ws_cnt_d = 8'd31;
       endcase
     end else begin
