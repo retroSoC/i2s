@@ -73,6 +73,8 @@ task automatic I2STest::test_send(input bit [31:0] run_times = 10);
   repeat (50) @(posedge this.apb4.pclk);
   this.write(`I2S_TXR_ADDR, 32'b1010_1011); // left chnl
   this.write(`I2S_TXR_ADDR, 32'b1110_0011); // right chnl
+  this.write(`I2S_TXR_ADDR, 32'b0010_1011); // left chnl
+  this.write(`I2S_TXR_ADDR, 32'b0100_0110); // right chnl
 endtask
 
 task automatic I2STest::test_irq(input bit [31:0] run_times = 10);

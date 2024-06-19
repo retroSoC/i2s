@@ -157,6 +157,7 @@ module apb4_i2s #(
       .rst_n_i(apb4.presetn),
       .en_i   (s_bit_en),
       .pol_i  (s_bit_pol),
+      .chm_i  (s_bit_chm),
       .chl_i  (s_bit_chl),
       .div_i  (s_i2s_div_q),
       .sck_o  (s_i2s_mst_sck),

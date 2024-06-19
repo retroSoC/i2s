@@ -22,7 +22,7 @@
  * BITS:   | 31:27 | 26:22 | 21:17 | 16:15 | 14:13 | 12:11 | 10:9 | 8:7 | 6   | 5   | 4   | 3   | 2    | 1    | 0  |
  * FIELDS: | RES   | RXTH  | TXTH  | DTL   | CHL   | CHM   | FMT  | WM  | LSB | POL | LSR | CLR | RXIE | TXIE | EN |
  * PERMS:  | NONE  | RW    | RW    | RW    | RW    | RW    | RW   | RW  | RW  | RW  | RW  | RW  | RW   | RW   | RW |
- * ---------------------------------------------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------------------------------------------
  * I2S_DIV:
  * BITS:   | 31:16 | 15:0   |
  * FIELDS: | RES   | SCKDIV |
@@ -73,8 +73,8 @@
 `define I2S_WM_NONE 2'b11
 
 `define I2S_FMT_I2S  2'b00
-`define I2S_FMT_MSB  2'b01
-`define I2S_FMT_LSB  2'b10
+`define I2S_FMT_MSB  2'b01 // NOTE: no support
+`define I2S_FMT_LSB  2'b10 // NOTE: no support
 `define I2S_FMT_NONE 2'b11
 
 `define I2S_CHM_STERO 2'b00
