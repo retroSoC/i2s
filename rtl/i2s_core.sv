@@ -93,7 +93,7 @@ module i2s_core (
   edge_det_sync #(
       .DATA_WIDTH(1)
   ) u_ws_edge_det_sync (
-      .clk_i  (i2s_sck_i),
+      .clk_i  (clk_i),
       .rst_n_i(rst_n_i),
       .dat_i  (s_ws_q),
       .re_o   (s_ws_re),
