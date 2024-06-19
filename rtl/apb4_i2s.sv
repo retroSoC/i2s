@@ -30,8 +30,8 @@ module apb4_i2s #(
   logic [`I2S_STAT_WIDTH-1:0] s_i2s_stat_d, s_i2s_stat_q;
   // bit
   logic s_bit_en, s_bit_txie, s_bit_rxie, s_bit_clr, s_bit_lsr;
-  logic s_bit_pol, s_bit_lsb;
-  logic [1:0] s_bit_wm, s_bit_fmt, s_bit_chl, s_bit_dtl, s_bit_chm;
+  logic s_bit_pol, s_bit_lsb, s_bit_wm;
+  logic [1:0] s_bit_fmt, s_bit_chl, s_bit_dtl, s_bit_chm;
   logic [4:0] s_bit_txth, s_bit_rxth;
   logic s_bit_txif, s_bit_rxif, s_busy, s_chd;
   // i2s
@@ -57,13 +57,13 @@ module apb4_i2s #(
   assign s_bit_lsr       = s_i2s_ctrl_q[4];
   assign s_bit_pol       = s_i2s_ctrl_q[5];
   assign s_bit_lsb       = s_i2s_ctrl_q[6];
-  assign s_bit_wm        = s_i2s_ctrl_q[8:7];
-  assign s_bit_fmt       = s_i2s_ctrl_q[10:9];
-  assign s_bit_chm       = s_i2s_ctrl_q[12:11];
-  assign s_bit_chl       = s_i2s_ctrl_q[14:13];
-  assign s_bit_dtl       = s_i2s_ctrl_q[16:15];
-  assign s_bit_txth      = s_i2s_ctrl_q[21:17];
-  assign s_bit_rxth      = s_i2s_ctrl_q[26:22];
+  assign s_bit_wm        = s_i2s_ctrl_q[7];
+  assign s_bit_fmt       = s_i2s_ctrl_q[9:8];
+  assign s_bit_chm       = s_i2s_ctrl_q[11:10];
+  assign s_bit_chl       = s_i2s_ctrl_q[13:12];
+  assign s_bit_dtl       = s_i2s_ctrl_q[15:14];
+  assign s_bit_txth      = s_i2s_ctrl_q[20:16];
+  assign s_bit_rxth      = s_i2s_ctrl_q[25:21];
   assign s_bit_txif      = s_i2s_stat_q[0];
   assign s_bit_rxif      = s_i2s_stat_q[1];
 

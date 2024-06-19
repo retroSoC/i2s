@@ -17,7 +17,7 @@ module i2s_core (
     input  logic                       rst_n_i,
     input  logic                       en_i,
     input  logic                       lsb_i,
-    input  logic [                1:0] wm_i,
+    input  logic                       wm_i,
     input  logic [                1:0] fmt_i,
     input  logic [                1:0] chm_i,
     input  logic [                1:0] chl_i,
@@ -38,13 +38,11 @@ module i2s_core (
   logic s_ws_d, s_ws_q, s_sck_re, s_ws_re, s_ws_fe;
   logic s_chd_d, s_chd_q;
   logic s_i2s_fsm_d, s_i2s_fsm_q;
+  logic [`I2S_DATA_WIDTH-1:0] s_sd_in  [0:3];
+  logic [                3:0] s_sd_out;
 
-  logic [3:0] s_sd;
-
-  assign busy_o     = tx_valid_i && tx_ready_o;
-  assign chd_o      = s_chd_q;
-  assign rx_valid_o = '0;
-  assign rx_data_o  = '0;
+  assign busy_o = tx_valid_i && tx_ready_o;
+  assign chd_o  = s_chd_q;
 
   always_comb begin
     s_chd_d = s_chd_q;
@@ -116,23 +114,64 @@ module i2s_core (
         .rst_n_i   (rst_n_i),
         .type_i    (`SHIFT_REG_TYPE_LOGIC),
         .dir_i     ({1'b0, lsb_i}),
-        .ld_en_i   (tx_valid_i && tx_ready_o),                          // BUG:
+        .ld_en_i   (tx_valid_i && tx_ready_o),
         .sft_en_i  (s_sck_re),
         .ser_dat_i (1'b0),
         .par_data_i(tx_data_i[`I2S_DATA_WIDTH-1:`I2S_DATA_WIDTH-8*i]),
-        .ser_dat_o (s_sd[i-1]),
+        .ser_dat_o (s_sd_out[i-1]),
         .par_data_o()
     );
   end
 
   always_comb begin
-    unique case (chl_i)
-      `I2S_DAT_8_BITS:  i2s_sd_o = s_sd[0];
-      `I2S_DAT_16_BITS: i2s_sd_o = s_sd[1];
-      `I2S_DAT_24_BITS: i2s_sd_o = s_sd[2];
-      `I2S_DAT_32_BITS: i2s_sd_o = s_sd[3];
-      default:          i2s_sd_o = s_sd[0];
-    endcase
+    if (wm_i == `I2S_WM_NORM) begin
+      unique case (chl_i)
+        `I2S_DAT_8_BITS:  i2s_sd_o = s_sd_out[0];
+        `I2S_DAT_16_BITS: i2s_sd_o = s_sd_out[1];
+        `I2S_DAT_24_BITS: i2s_sd_o = s_sd_out[2];
+        `I2S_DAT_32_BITS: i2s_sd_o = s_sd_out[3];
+        default:          i2s_sd_o = s_sd_out[0];
+      endcase
+    end else begin
+      i2s_sd_o = i2s_sd_i;
+    end
+  end
+
+  assign rx_valid_o = '0;
+  for (genvar i = 1; i <= 4; i++) begin : I2S_RX_SHIFT_ONE_BLOCK
+    shift_reg #(
+        .DATA_WIDTH(8 * i),
+        .SHIFT_NUM (1)
+    ) u_i2s_rx_shift_reg (
+        .clk_i     (clk_i),
+        .rst_n_i   (rst_n_i),
+        .type_i    (`SHIFT_REG_TYPE_SERI),
+        .dir_i     ({1'b0, lsb_i}),
+        .ld_en_i   (1'b0),
+        .sft_en_i  (s_sck_re),
+        .ser_dat_i (i2s_sd_i),
+        .par_data_i('0),
+        .ser_dat_o (),
+        .par_data_o(s_sd_in[i-1][8*i-1:0])
+    );
+
+    // fill unused bits
+    if (i <= 3) begin
+      assign s_sd_in[i-1][`I2S_DATA_WIDTH-1:8*i] = '0;
+    end
+  end
+
+  always_comb begin
+    rx_data_o = '0;
+    if (wm_i == `I2S_WM_NORM) begin
+      unique case (chl_i)
+        `I2S_DAT_8_BITS:  rx_data_o = s_sd_in[0];
+        `I2S_DAT_16_BITS: rx_data_o = s_sd_in[1];
+        `I2S_DAT_24_BITS: rx_data_o = s_sd_in[2];
+        `I2S_DAT_32_BITS: rx_data_o = s_sd_in[3];
+        default:          rx_data_o = s_sd_in[0];
+      endcase
+    end
   end
 
 endmodule
