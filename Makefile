@@ -17,6 +17,7 @@ SRC_FILE ?=
 SRC_FILE += ../rtl/i2s_clkgen.sv
 SRC_FILE += ../rtl/i2s_core.sv
 SRC_FILE += ../rtl/apb4_i2s.sv
+SRC_FILE += ../model/mic.sv
 SRC_FILE += ../tb/i2s_test.sv
 SRC_FILE += ../tb/test_top.sv
 SRC_FILE += ../tb/apb4_i2s_tb.sv

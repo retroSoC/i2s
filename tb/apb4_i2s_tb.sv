@@ -9,12 +9,14 @@
 // See the Mulan PSL v2 for more details.
 
 `include "apb4_if.sv"
+`include "gpio_pad.sv"
 `include "i2s_define.sv"
 
 module apb4_i2s_tb ();
   localparam real CLK_PEROID = 81.38;  // ~12.288M just for sim
 
   logic rst_n_i, clk_i;
+  wire s_i2s_sck_pad, s_i2s_ws_pad;
 
   initial begin
     clk_i = 1'b0;
@@ -40,6 +42,22 @@ module apb4_i2s_tb ();
 
   i2s_if u_i2s_if ();
 
+
+  tri_pd_pad_h u_i2s_sck_pad (
+      .i_i   (u_i2s_if.sck_o),
+      .oen_i (u_i2s_if.sck_en_o),
+      .ren_i (),
+      .c_o   (u_i2s_if.sck_i),
+      .pad_io(s_i2s_sck_pad)
+  );
+  tri_pd_pad_h u_i2s_ws_pad (
+      .i_i   (u_i2s_if.ws_o),
+      .oen_i (u_i2s_if.ws_en_o),
+      .ren_i (),
+      .c_o   (u_i2s_if.ws_i),
+      .pad_io(s_i2s_ws_pad)
+  );
+
   test_top u_test_top (
       .apb4(u_apb4_if.master),
       .i2s (u_i2s_if.tb)
@@ -47,6 +65,12 @@ module apb4_i2s_tb ();
   apb4_i2s u_apb4_i2s (
       .apb4(u_apb4_if.slave),
       .i2s (u_i2s_if.dut)
+  );
+
+  mic u_mic (
+      .sck_i(s_i2s_sck_pad),
+      .ws_i (s_i2s_ws_pad),
+      .sd_o (u_i2s_if.sd_i)
   );
 
 endmodule
