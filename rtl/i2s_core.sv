@@ -36,13 +36,27 @@ module i2s_core (
 );
 
   logic s_ws_d, s_ws_q, s_sck_re, s_ws_re, s_ws_fe;
+  logic s_chd_d, s_chd_q;
   logic s_i2s_fsm_d, s_i2s_fsm_q;
+
   logic [3:0] s_sd;
 
   assign busy_o     = tx_valid_i && tx_ready_o;
-  assign chd_o      = s_ws_re;
+  assign chd_o      = s_chd_q;
   assign rx_valid_o = '0;
   assign rx_data_o  = '0;
+
+  always_comb begin
+    s_chd_d = s_chd_q;
+    if (s_ws_re) s_chd_d = 1'b1;
+    else if (s_ws_fe) s_chd_d = 1'b0;
+  end
+  dffr #(1) u_chd_dffr (
+      clk_i,
+      rst_n_i,
+      s_chd_d,
+      s_chd_q
+  );
 
   always_comb begin
     s_i2s_fsm_d = s_i2s_fsm_q;
@@ -102,7 +116,7 @@ module i2s_core (
         .rst_n_i   (rst_n_i),
         .type_i    (`SHIFT_REG_TYPE_LOGIC),
         .dir_i     ({1'b0, lsb_i}),
-        .ld_en_i   (tx_valid_i && tx_ready_o),
+        .ld_en_i   (tx_valid_i && tx_ready_o),                          // BUG:
         .sft_en_i  (s_sck_re),
         .ser_dat_i (1'b0),
         .par_data_i(tx_data_i[`I2S_DATA_WIDTH-1:`I2S_DATA_WIDTH-8*i]),
