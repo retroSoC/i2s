@@ -137,7 +137,8 @@ module apb4_i2s #(
   );
 
   always_comb begin
-    apb4.prdata = '0;
+    apb4.prdata    = '0;
+    s_rx_pop_ready = 1'b0;
     if (s_apb4_rd_hdshk) begin
       unique case (s_apb4_addr)
         `I2S_CTRL: apb4.prdata[`I2S_CTRL_WIDTH-1:0] = s_i2s_ctrl_q;
@@ -147,7 +148,10 @@ module apb4_i2s #(
           apb4.prdata[`I2S_RXR_WIDTH-1:0] = s_rx_pop_data;
         end
         `I2S_STAT: apb4.prdata[`I2S_STAT_WIDTH-1:0] = s_i2s_stat_q;
-        default:   apb4.prdata = '0;
+        default: begin
+          apb4.prdata    = '0;
+          s_rx_pop_ready = 1'b0;
+        end
       endcase
     end
   end
