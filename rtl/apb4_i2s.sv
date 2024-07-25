@@ -35,7 +35,9 @@ module apb4_i2s #(
   logic [4:0] s_bit_txth, s_bit_rxth;
   logic s_bit_txif, s_bit_rxif, s_busy, s_chd;
   // i2s
-  logic s_i2s_mst_sck, s_i2s_sck, s_i2s_mst_ws, s_i2s_ws;
+  logic s_i2s_mst_sck, s_i2s_mst_sck_trg;
+  logic s_i2s_sck_trg, s_i2s_sck, s_i2s_slv_sck_trg;
+  logic s_i2s_mst_ws, s_i2s_ws;
   // irq
   logic s_tx_irq_trg, s_rx_irq_trg;
   // fifo
@@ -73,6 +75,7 @@ module apb4_i2s #(
   assign i2s.sck_en_o    = s_bit_lsr;
   assign i2s.ws_o        = s_bit_lsr ? 1'b0 : s_i2s_mst_ws;
   assign i2s.ws_en_o     = s_bit_lsr;
+  assign s_i2s_sck_trg   = s_bit_lsr ? s_i2s_slv_sck_trg : s_i2s_mst_sck_trg;
   assign s_i2s_sck       = s_bit_lsr ? i2s.sck_i : s_i2s_mst_sck;
   assign s_i2s_ws        = s_bit_lsr ? i2s.ws_i : s_i2s_mst_ws;
   // irq
@@ -80,8 +83,18 @@ module apb4_i2s #(
   assign s_rx_irq_trg    = s_bit_rxth < s_rx_elem;
   assign i2s.irq_o       = s_bit_txif | s_bit_rxif;
 
-  assign s_i2s_ctrl_en   = s_apb4_wr_hdshk && s_apb4_addr == `I2S_CTRL && ~s_busy;
-  assign s_i2s_ctrl_d    = apb4.pwdata[`I2S_CTRL_WIDTH-1:0];
+  cdc_sync #(
+      .STAGE     (2),
+      .DATA_WIDTH(1)
+  ) u_ext_trg_cdc_sync (
+      apb4.pclk,
+      apb4.presetn,
+      i2s.sck_i,
+      s_i2s_slv_sck_trg
+  );
+
+  assign s_i2s_ctrl_en = s_apb4_wr_hdshk && s_apb4_addr == `I2S_CTRL && ~s_busy;
+  assign s_i2s_ctrl_d  = apb4.pwdata[`I2S_CTRL_WIDTH-1:0];
   dffer #(`I2S_CTRL_WIDTH) u_i2s_ctrl_dffer (
       apb4.pclk,
       apb4.presetn,
@@ -137,8 +150,8 @@ module apb4_i2s #(
   );
 
   always_comb begin
-    apb4.prdata    = '0;
     s_rx_pop_ready = 1'b0;
+    apb4.prdata    = '0;
     if (s_apb4_rd_hdshk) begin
       unique case (s_apb4_addr)
         `I2S_CTRL: apb4.prdata[`I2S_CTRL_WIDTH-1:0] = s_i2s_ctrl_q;
@@ -149,23 +162,24 @@ module apb4_i2s #(
         end
         `I2S_STAT: apb4.prdata[`I2S_STAT_WIDTH-1:0] = s_i2s_stat_q;
         default: begin
-          apb4.prdata    = '0;
           s_rx_pop_ready = 1'b0;
+          apb4.prdata    = '0;
         end
       endcase
     end
   end
 
   i2s_clkgen u_i2s_clkgen (
-      .clk_i  (apb4.pclk),
-      .rst_n_i(apb4.presetn),
-      .en_i   (s_bit_en),
-      .pol_i  (s_bit_pol),
-      .chm_i  (s_bit_chm),
-      .chl_i  (s_bit_chl),
-      .div_i  (s_i2s_div_q),
-      .sck_o  (s_i2s_mst_sck),
-      .ws_o   (s_i2s_mst_ws)
+      .clk_i    (apb4.pclk),
+      .rst_n_i  (apb4.presetn),
+      .en_i     (s_bit_en),
+      .pol_i    (s_bit_pol),
+      .chm_i    (s_bit_chm),
+      .chl_i    (s_bit_chl),
+      .div_i    (s_i2s_div_q),
+      .sck_o    (s_i2s_mst_sck),
+      .sck_trg_o(s_i2s_mst_sck_trg),
+      .ws_o     (s_i2s_mst_ws)
   );
 
   assign s_tx_push_ready = ~s_tx_full;
@@ -205,25 +219,26 @@ module apb4_i2s #(
   );
 
   i2s_core u_i2s_core (
-      .clk_i     (apb4.pclk),
-      .rst_n_i   (apb4.presetn),
-      .en_i      (s_bit_en),
-      .lsb_i     (s_bit_lsb),
-      .wm_i      (s_bit_wm),
-      .fmt_i     (s_bit_fmt),
-      .chm_i     (s_bit_chm),
-      .chl_i     (s_bit_chl),
-      .busy_o    (s_busy),
-      .chd_o     (s_chd),
-      .tx_valid_i(s_tx_pop_valid),
-      .tx_ready_o(s_tx_pop_ready),
-      .tx_data_i (s_tx_pop_data),
-      .rx_valid_o(s_rx_push_valid),
-      .rx_ready_i(s_rx_push_ready),
-      .rx_data_o (s_rx_push_data),
-      .i2s_sck_i (s_i2s_sck),
-      .i2s_ws_i  (s_i2s_ws),
-      .i2s_sd_o  (i2s.sd_o),
-      .i2s_sd_i  (i2s.sd_i)
+      .clk_i        (apb4.pclk),
+      .rst_n_i      (apb4.presetn),
+      .en_i         (s_bit_en),
+      .lsb_i        (s_bit_lsb),
+      .wm_i         (s_bit_wm),
+      .fmt_i        (s_bit_fmt),
+      .chm_i        (s_bit_chm),
+      .chl_i        (s_bit_chl),
+      .busy_o       (s_busy),
+      .chd_o        (s_chd),
+      .tx_valid_i   (s_tx_pop_valid),
+      .tx_ready_o   (s_tx_pop_ready),
+      .tx_data_i    (s_tx_pop_data),
+      .rx_valid_o   (s_rx_push_valid),
+      .rx_ready_i   (s_rx_push_ready),
+      .rx_data_o    (s_rx_push_data),
+      .i2s_sck_i    (s_i2s_sck),
+      .i2s_sck_trg_i(s_i2s_sck_trg),
+      .i2s_ws_i     (s_i2s_ws),
+      .i2s_sd_o     (i2s.sd_o),
+      .i2s_sd_i     (i2s.sd_i)
   );
 endmodule

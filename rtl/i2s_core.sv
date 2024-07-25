@@ -30,12 +30,13 @@ module i2s_core (
     input  logic                       rx_ready_i,
     output logic [`I2S_DATA_WIDTH-1:0] rx_data_o,
     input  logic                       i2s_sck_i,
+    input  logic                       i2s_sck_trg_i,
     input  logic                       i2s_ws_i,
     output logic                       i2s_sd_o,
     input  logic                       i2s_sd_i
 );
 
-  logic s_ws_d, s_ws_q, s_sck_re, s_ws_re, s_ws_fe;
+  logic s_ws_en, s_ws_d, s_ws_q, s_sck_re, s_ws_re, s_ws_fe;
   logic s_chd_d, s_chd_q;
   logic s_i2s_fsm_d, s_i2s_fsm_q;
   logic [`I2S_DATA_WIDTH-1:0] s_sd_in  [0:3];
@@ -71,10 +72,12 @@ module i2s_core (
       s_i2s_fsm_q
   );
 
-  assign s_ws_d = i2s_ws_i;
-  dffr #(1) u_ws_dffr (
-      i2s_sck_i,
+  assign s_ws_en = i2s_sck_trg_i;
+  assign s_ws_d  = i2s_ws_i;
+  dffer #(1) u_ws_dffer (
+      clk_i,
       rst_n_i,
+      s_ws_en,
       s_ws_d,
       s_ws_q
   );

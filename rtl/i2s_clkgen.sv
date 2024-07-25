@@ -21,6 +21,7 @@ module i2s_clkgen (
     input  logic [               1:0] chl_i,
     input  logic [`I2S_DIV_WIDTH-1:0] div_i,
     output logic                      sck_o,
+    output logic                      sck_trg_o,
     output logic                      ws_o
 );
 
@@ -31,6 +32,7 @@ module i2s_clkgen (
   logic s_sck_cnt_zero, s_ws_cnt_zero;
 
   assign sck_o          = s_sck_q;
+  assign sck_trg_o      = en_i && s_sck_cnt_zero;
   assign s_sck_cnt_zero = s_sck_cnt_q == '0;
   assign s_ws_cnt_zero  = s_ws_cnt_q == '0;
 
