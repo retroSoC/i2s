@@ -24,6 +24,7 @@ class I2STest extends APB4Master;
   extern task automatic test_reset_reg();
   extern task automatic test_wr_rd_reg(input bit [31:0] run_times = 1000);
   extern task automatic test_clk_div(input bit [31:0] run_times = 10);
+  extern task automatic test_loop_mode();
   extern task automatic test_send(input bit [31:0] run_times = 10);
   extern task automatic test_irq(input bit [31:0] run_times = 10);
 endclass
@@ -58,23 +59,32 @@ task automatic I2STest::test_clk_div(input bit [31:0] run_times = 10);
   $display("=== [test i2s clk div] ===");
   repeat (2000 * 6) @(posedge this.apb4.pclk);
   this.write(`I2S_CTRL_ADDR, 32'b0);
-  this.write(`I2S_DIV_ADDR, 32'd1);
+  this.write(`I2S_DIV_ADDR, 32'd0);  // div2
   repeat (100) @(posedge this.apb4.pclk);
   this.write(`I2S_CTRL_ADDR, 32'b0_0001);
+endtask
+
+task automatic I2STest::test_loop_mode();
+  $display("=== [test loop mode] ===");
+  this.write(`I2S_CTRL_ADDR, 32'b0);
+  this.write(`I2S_DIV_ADDR, 32'd1);  // just for test div4
+  repeat (100) @(posedge this.apb4.pclk);
+  this.write(`I2S_CTRL_ADDR, 32'b1000_0001);
+
 endtask
 
 task automatic I2STest::test_send(input bit [31:0] run_times = 10);
   $display("=== [test i2s send] ===");
   repeat (200 * 6) @(posedge this.apb4.pclk);
   this.write(`I2S_CTRL_ADDR, 32'b0);
-  this.write(`I2S_DIV_ADDR, 32'd1); // just for test div4
+  this.write(`I2S_DIV_ADDR, 32'd1);  // just for test div4
   repeat (100) @(posedge this.apb4.pclk);
   this.write(`I2S_CTRL_ADDR, 32'b0_0001);
   repeat (50) @(posedge this.apb4.pclk);
-  this.write(`I2S_TXR_ADDR, 32'b1010_1011); // left chnl
-  this.write(`I2S_TXR_ADDR, 32'b1110_0011); // right chnl
-  this.write(`I2S_TXR_ADDR, 32'b0010_1011); // left chnl
-  this.write(`I2S_TXR_ADDR, 32'b0100_0110); // right chnl
+  this.write(`I2S_TXR_ADDR, 32'b1010_1011);  // left chnl
+  this.write(`I2S_TXR_ADDR, 32'b1110_0011);  // right chnl
+  this.write(`I2S_TXR_ADDR, 32'b0010_1011);  // left chnl
+  this.write(`I2S_TXR_ADDR, 32'b0100_0110);  // right chnl
 endtask
 
 task automatic I2STest::test_irq(input bit [31:0] run_times = 10);
