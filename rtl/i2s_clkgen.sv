@@ -42,7 +42,6 @@ module i2s_clkgen (
       `I2S_CHM_LEFT:  ws_o = ~pol_i;
       `I2S_CHM_RIGHT: ws_o = pol_i;
       `I2S_CHM_NONE:  ws_o = s_ws_q;
-      default:        ws_o = s_ws_q;
     endcase
   end
 
@@ -77,7 +76,6 @@ module i2s_clkgen (
         `I2S_DAT_16_BITS: s_ws_cnt_d = 8'd63;
         `I2S_DAT_24_BITS: s_ws_cnt_d = 8'd95;
         `I2S_DAT_32_BITS: s_ws_cnt_d = 8'd127;
-        default:          s_ws_cnt_d = 8'd31;
       endcase
     end else begin
       s_ws_cnt_d = s_ws_cnt_q - 1'b1;

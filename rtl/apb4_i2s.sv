@@ -75,6 +75,7 @@ module apb4_i2s #(
   assign i2s.sck_en_o    = ~s_bit_lsr;
   assign i2s.ws_o        = s_bit_lsr ? 1'b0 : s_i2s_mst_ws;
   assign i2s.ws_en_o     = ~s_bit_lsr;
+  // intern signals
   assign s_i2s_sck_trg   = s_bit_lsr ? s_i2s_slv_sck_trg : s_i2s_mst_sck_trg;
   assign s_i2s_sck       = s_bit_lsr ? i2s.sck_i : s_i2s_mst_sck;
   assign s_i2s_ws        = s_bit_lsr ? i2s.ws_i : s_i2s_mst_ws;

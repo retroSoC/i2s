@@ -105,7 +105,6 @@ module i2s_core (
     unique case (s_i2s_fsm_q)
       `I2S_FSM_IDLE: tx_ready_o = s_ws_fe;
       `I2S_FSM_BUSY: tx_ready_o = s_ws_re | s_ws_fe;
-      default:       tx_ready_o = s_ws_fe;
     endcase
   end
   for (genvar i = 1; i <= 4; i++) begin : I2S_TX_SHIFT_ONE_BLOCK
@@ -133,14 +132,13 @@ module i2s_core (
         `I2S_DAT_16_BITS: i2s_sd_o = s_sd_out[1];
         `I2S_DAT_24_BITS: i2s_sd_o = s_sd_out[2];
         `I2S_DAT_32_BITS: i2s_sd_o = s_sd_out[3];
-        default:          i2s_sd_o = s_sd_out[0];
       endcase
     end else begin
       i2s_sd_o = i2s_sd_i;
     end
   end
 
-  assign rx_valid_o = '0;
+  assign rx_valid_o = '0; // TODO:
   for (genvar i = 1; i <= 4; i++) begin : I2S_RX_SHIFT_ONE_BLOCK
     shift_reg #(
         .DATA_WIDTH(8 * i),
@@ -172,7 +170,6 @@ module i2s_core (
         `I2S_DAT_16_BITS: rx_data_o = s_sd_in[1];
         `I2S_DAT_24_BITS: rx_data_o = s_sd_in[2];
         `I2S_DAT_32_BITS: rx_data_o = s_sd_in[3];
-        default:          rx_data_o = s_sd_in[0];
       endcase
     end
   end
