@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Beijing Institute of Open Source Chip
+// Copyright (c) 2023-2024 Miao Yuchi <miaoyuchi@ict.ac.cn>
 // i2s is licensed under Mulan PSL v2.
 // You can use this software according to the terms and conditions of the Mulan PSL v2.
 // You may obtain a copy of Mulan PSL v2 at:
@@ -65,7 +65,7 @@ task automatic I2STest::test_clk_div(input bit [31:0] run_times = 10);
 endtask
 
 task automatic I2STest::test_loop_mode();
-  $display("=== [test loop mode] ===");
+  $display("%t=== [test loop mode] ===", $time);
   this.write(`I2S_CTRL_ADDR, 32'b0);
   this.write(`I2S_DIV_ADDR, 32'd1);  // just for test div4
   repeat (100) @(posedge this.apb4.pclk);
