@@ -8,7 +8,7 @@
 // MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 // See the Mulan PSL v2 for more details.
 
-`include "setting.sv"
+`include "config.svh"
 
 module mic #(
     parameter int DATA_WIDTH = 24
@@ -18,14 +18,16 @@ module mic #(
     output logic sd_o
 );
 
-  reg [DATA_WIDTH-1:0] r_right_chnl_dat = '0;
-  reg [DATA_WIDTH-1:0] r_left_chnl_dat = '0;
+  logic [DATA_WIDTH-1:0] r_right_chnl_dat = '0;
+  logic [DATA_WIDTH-1:0] r_left_chnl_dat = '0;
+  logic                  r_ws = '0;
 
-  always @(negedge ws_i) r_left_chnl_dat <= #`REGISTER_DELAY $random;
-  always @(posedge ws_i) r_right_chnl_dat <= #`REGISTER_DELAY $random;
+  always @(posedge sck_i) r_ws <= #`REGISTER_DELAY ws_i;
+  always @(negedge r_ws) r_left_chnl_dat <= #`REGISTER_DELAY $random;
+  always @(posedge r_ws) r_right_chnl_dat <= #`REGISTER_DELAY $random;
 
-  always @(posedge sck_i)
-    if (~ws_i) begin
+  always @(negedge sck_i)
+    if (~r_ws) begin
       sd_o            <= #`REGISTER_DELAY r_left_chnl_dat[DATA_WIDTH-1];
       r_left_chnl_dat <= #`REGISTER_DELAY r_left_chnl_dat << 1;
     end else begin
